@@ -23,7 +23,7 @@ function listenForClicks() {
      * Given the name of a beast, get the URL to the corresponding image.
      */
     function beastNameToURL(beastName) {
-        return browser.runtime.getURL("icons/border-48.png");
+        return browser.runtime.getURL("dist/icons/border-48.png");
     }
 
     /**
@@ -94,6 +94,6 @@ function reportExecuteScriptError(error) {
  * If we couldn't inject the script, handle the error.
  */
 browser.tabs
-  .executeScript({ file: "/content_scripts/test.js" })
+  .executeScript({ file: "/dist/content_scripts/test.js" })
   .then(listenForClicks)
   .catch(reportExecuteScriptError);
