@@ -1,0 +1,28 @@
+{
+
+  "manifest_version": 2,
+  "name": "Spyglass",
+  "version": "1.0",
+
+  "description": "Sync bookmarks and add URLs to your personal search engine.",
+  "homepage_url": "https://github.com/a5huynh/spyglass",
+
+  "icons": {
+    "48": "icons/border-48.png",
+    "96": "icons/border-96.png"
+  },
+
+  "permissions": [
+    "activeTab",
+    "bookmarks",
+    "history",
+    "tabs"
+  ],
+
+  "browser_action": {
+    "default_icon": "icons/border-48.png",
+    "default_title": "Spyglass",
+    "default_popup": "popup/add_uri.html"
+  }
+}
+
