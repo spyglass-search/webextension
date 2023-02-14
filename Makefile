@@ -1,12 +1,6 @@
-.PHONY: build
+.PHONY: dev
 
-default: build
+default: dev
 
-build:
-	npx tailwindcss -i ./app/styles/main.css -o ./dist/popup/styles.css
-
-watch:
-	npx tailwindcss -i ./app/styles/main.css -o ./dist/popup/styles.css --watch
-
-run-ext:
-	npx web-ext run --devtools
+dev:
+	npx webextension-toolbox dev firefox
