@@ -3,10 +3,10 @@
 default: build
 
 build:
-	npx tailwindcss -i ./src/styles.css -o ./dist/popup/styles.css
+	npx tailwindcss -i ./app/styles/main.css -o ./dist/popup/styles.css
 
 watch:
-	npx tailwindcss -i ./src/styles.css -o ./dist/popup/styles.css --watch
+	npx tailwindcss -i ./app/styles/main.css -o ./dist/popup/styles.css --watch
 
 run-ext:
 	npx web-ext run --devtools
