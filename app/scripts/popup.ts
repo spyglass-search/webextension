@@ -1,5 +1,6 @@
 import "../styles/main.css";
 import browser, { Tabs } from "webextension-polyfill";
+import { client } from "lib/rpc";
 
 /**
  * Listen for clicks on the buttons, and send the appropriate message to
@@ -21,7 +22,22 @@ function listenForClicks() {
         browser.tabs.sendMessage(tabs[0].id, {
           command: "add_uri",
           url: el.value,
-        });
+        })
+          .then(() => {
+            client.request('state_protocol_version', {}, (err, error, result) => {
+              if (err) {
+                console.error(err);
+                return;
+              }
+
+              if (error) {
+                console.error(error);
+                return;
+              }
+
+              console.log(result);
+            });
+          });
       }
     }
 

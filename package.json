@@ -4,6 +4,7 @@
   "description": "Sync bookmarks and add URLs to your personal search engine.",
   "devDependencies": {
     "@types/webextension-polyfill": "^0.10.0",
+    "@types/whatwg-fetch": "^0.0.33",
     "@webextension-toolbox/webextension-toolbox": "^5.2.2",
     "autoprefixer": "^10.4.13",
     "css-loader": "^6.7.3",
@@ -16,6 +17,7 @@
   },
   "dependencies": {
     "jayson": "^4.0.0",
-    "webextension-polyfill": "^0.10.0"
+    "webextension-polyfill": "^0.10.0",
+    "whatwg-fetch": "^3.6.2"
   }
 }
