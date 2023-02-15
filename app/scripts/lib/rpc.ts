@@ -1,9 +1,35 @@
 import "whatwg-fetch";
 import rpcBrowserClient from "jayson/lib/client/browser";
+import { JSONRPCError, JSONRPCErrorLike, JSONRPCResultLike } from "jayson";
 
-type ClientBrowserCallServerFunctionCallback = (err?:Error | null, response?:string) => void;
+type ClientBrowserCallServerFunctionCallback = (
+  err?: Error | null,
+  response?: string
+) => void;
 
-function callServer(request: string, callback: ClientBrowserCallServerFunctionCallback) {
+type RpcError = JSONRPCErrorLike | null | undefined;
+
+export enum RawDocType {
+  Html = "Html",
+}
+
+export enum RawDocSource {
+  Cli = "Cli",
+  WebExtension = "WebExtension"
+}
+
+export interface RawDocumentRequest {
+  url: string;
+  content: string;
+  doc_type: RawDocType;
+  source: RawDocSource,
+  tags: Array<[string, string]>;
+}
+
+function callServer(
+  request: string,
+  callback: ClientBrowserCallServerFunctionCallback
+) {
   const options = {
     method: "POST",
     body: request,
@@ -12,7 +38,6 @@ function callServer(request: string, callback: ClientBrowserCallServerFunctionCa
     },
   };
 
-  console.info(`calling: ${request}`);
   fetch("http://localhost:4664", options)
     .then(function (res) {
       return res.text();
@@ -25,4 +50,18 @@ function callServer(request: string, callback: ClientBrowserCallServerFunctionCa
     });
 }
 
-export const client = new rpcBrowserClient(callServer, {});
+export class SpyglassRpcClient {
+  client: rpcBrowserClient = new rpcBrowserClient(callServer, {});
+
+  add_raw_document(doc: RawDocumentRequest) {
+    this.client.request(
+      "spyglass_index.add_raw_document",
+      { doc },
+      (err: RpcError, result: JSONRPCResultLike) => {
+        if (err) {
+          throw err;
+        }
+      }
+    );
+  }
+}

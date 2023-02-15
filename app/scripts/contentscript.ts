@@ -6,6 +6,11 @@ declare global {
   }
 }
 
+function handle_add_uri() {
+  let content = document.documentElement.innerHTML;
+  return Promise.resolve({ content });
+}
+
 (() => {
   /**
    * Check and set a global guard variable.
@@ -16,21 +21,17 @@ declare global {
     return;
   }
 
-  console.log("Content script ran");
+  console.log("contentscript loaded!");
   window.hasRun = true;
-
-  function addURI(url: string) {
-    alert(url);
-  }
 
   /**
    * Listen for messages from the background script.
    */
   browser.runtime.onMessage.addListener((message) => {
     if (message.command === "add_uri") {
-      addURI(message.url);
-    } else if (message.command === "reset") {
-      console.log("resetting!");
+      return handle_add_uri();
     }
+
+    return true;
   });
 })();

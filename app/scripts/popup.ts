@@ -1,12 +1,12 @@
 import "../styles/main.css";
 import browser, { Tabs } from "webextension-polyfill";
-import { client } from "lib/rpc";
+import { SpyglassRpcClient, RawDocType, RawDocumentRequest, RawDocSource } from "lib/rpc";
 
 /**
  * Listen for clicks on the buttons, and send the appropriate message to
  * the content script in the page.
  */
-function listenForClicks() {
+function handle_onclick() {
   const el = <HTMLInputElement>document.getElementById("current_url");
   browser.tabs
     .query({ currentWindow: true, active: true })
@@ -15,28 +15,26 @@ function listenForClicks() {
       el.value = tab.url || "";
     });
 
+  let client = new SpyglassRpcClient();
   document.addEventListener("click", (e: MouseEvent) => {
     // Grab the current active tab and
     function add_tab(tabs: Array<Tabs.Tab>) {
-      if (tabs[0].id) {
-        browser.tabs.sendMessage(tabs[0].id, {
-          command: "add_uri",
-          url: el.value,
-        })
-          .then(() => {
-            client.request('state_protocol_version', {}, (err, error, result) => {
-              if (err) {
-                console.error(err);
-                return;
-              }
+      if (tabs.length > 0 && tabs[0].id) {
+        browser.tabs
+          .sendMessage(tabs[0].id, {
+            command: "add_uri",
+            url: el.value,
+          })
+          .then(({ content }) => {
+            let doc: RawDocumentRequest = {
+              url: el.value,
+              content,
+              doc_type: RawDocType.Html,
+              tags: [["lens", "bookmarks"]],
+              source: RawDocSource.WebExtension
+            };
 
-              if (error) {
-                console.error(error);
-                return;
-              }
-
-              console.log(result);
-            });
+            client.add_raw_document(doc);
           });
       }
     }
@@ -74,7 +72,7 @@ function listenForClicks() {
  * There was an error executing the script.
  * Display the popup's error message, and hide the normal UI.
  */
-function reportExecuteScriptError(error: Error) {
+function handle_error(error: Error) {
   document.querySelector("#popup-content")?.classList.add("hidden");
   document.querySelector("#error-content")?.classList.remove("hidden");
   console.error(`Failed to execute content script: ${error.message}`);
@@ -87,5 +85,5 @@ function reportExecuteScriptError(error: Error) {
  */
 browser.tabs
   .executeScript({ file: "../scripts/contentscript.js" })
-  .then(listenForClicks)
-  .catch(reportExecuteScriptError);
+  .then(handle_onclick)
+  .catch(handle_error);
