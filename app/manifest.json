@@ -39,6 +39,7 @@
     "bookmarks",
     "history",
     "tabs",
+    "storage",
     "nativeMessaging",
     "http://localhost/*"
   ]

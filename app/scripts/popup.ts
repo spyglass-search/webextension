@@ -1,5 +1,6 @@
 import "../styles/main.css";
 import browser, { Tabs } from "webextension-polyfill";
+import { Commands } from "lib/cmd";
 import { SpyglassRpcClient, RawDocType, RawDocumentRequest, RawDocSource } from "lib/rpc";
 
 /**
@@ -22,7 +23,7 @@ function handle_onclick() {
       if (tabs.length > 0 && tabs[0].id) {
         browser.tabs
           .sendMessage(tabs[0].id, {
-            command: "add_uri",
+            command: Commands.AddDoc,
             url: el.value,
           })
           .then(({ content }) => {
@@ -39,10 +40,6 @@ function handle_onclick() {
       }
     }
 
-    function reset(tabs: Array<Tabs.Tab>) {
-      console.log("reset clicked");
-    }
-
     /**
      * Just log the error to the console.
      */
@@ -51,19 +48,18 @@ function handle_onclick() {
     }
 
     /**
-     * Get the active tab,
-     * then call "beastify()" or "reset()" as appropriate.
+     * Handle button clicks
      */
-    if ((<HTMLButtonElement>e.target)?.type === "reset") {
-      browser.tabs
-        .query({ active: true, currentWindow: true })
-        .then(reset)
-        .catch(reportError);
-    } else {
+    let btn_id = (<HTMLButtonElement>e.target)?.id;
+    if (btn_id === "cancel") {
+      window.close();
+    } else if (btn_id === "add") {
       browser.tabs
         .query({ active: true, currentWindow: true })
         .then(add_tab)
         .catch(reportError);
+    } else if (btn_id === "resync_bookmarks") {
+      browser.runtime.sendMessage({ "command": Commands.ResyncBookmarks });
     }
   });
 }

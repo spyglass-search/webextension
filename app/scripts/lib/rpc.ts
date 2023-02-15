@@ -1,6 +1,6 @@
 import "whatwg-fetch";
 import rpcBrowserClient from "jayson/lib/client/browser";
-import { JSONRPCError, JSONRPCErrorLike, JSONRPCResultLike } from "jayson";
+import { JSONRPCErrorLike, JSONRPCResultLike } from "jayson";
 
 type ClientBrowserCallServerFunctionCallback = (
   err?: Error | null,
@@ -11,6 +11,7 @@ type RpcError = JSONRPCErrorLike | null | undefined;
 
 export enum RawDocType {
   Html = "Html",
+  Url = "Url"
 }
 
 export enum RawDocSource {

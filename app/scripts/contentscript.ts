@@ -1,4 +1,5 @@
 import browser from "webextension-polyfill";
+import { Commands } from "lib/cmd";
 
 declare global {
   interface Window {
@@ -28,7 +29,7 @@ function handle_add_uri() {
    * Listen for messages from the background script.
    */
   browser.runtime.onMessage.addListener((message) => {
-    if (message.command === "add_uri") {
+    if (message.command === Commands.AddDoc) {
       return handle_add_uri();
     }
 
