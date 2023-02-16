@@ -1,22 +1,30 @@
 import "../styles/main.css";
-import browser, { Tabs } from "webextension-polyfill";
+import browser, { browserAction, Tabs } from "webextension-polyfill";
 import { Commands } from "lib/cmd";
-import { SpyglassRpcClient, RawDocType, RawDocumentRequest, RawDocSource } from "lib/rpc";
+import {
+  SpyglassRpcClient,
+  RawDocType,
+  RawDocumentRequest,
+  RawDocSource,
+} from "lib/rpc";
+
+const CURRENT_URL_BOX = document.getElementById(
+  "current_url"
+) as HTMLInputElement;
+const SPYGLASS_CLIENT = new SpyglassRpcClient();
 
 /**
  * Listen for clicks on the buttons, and send the appropriate message to
  * the content script in the page.
  */
-function handle_onclick() {
-  const el = <HTMLInputElement>document.getElementById("current_url");
+function handle_on_popup() {
   browser.tabs
     .query({ currentWindow: true, active: true })
     .then((tabs: Array<Tabs.Tab>) => {
       let tab = tabs[0];
-      el.value = tab.url || "";
+      CURRENT_URL_BOX.value = tab.url || "";
     });
 
-  let client = new SpyglassRpcClient();
   document.addEventListener("click", (e: MouseEvent) => {
     // Grab the current active tab and
     function add_tab(tabs: Array<Tabs.Tab>) {
@@ -24,18 +32,18 @@ function handle_onclick() {
         browser.tabs
           .sendMessage(tabs[0].id, {
             command: Commands.AddDoc,
-            url: el.value,
+            url: CURRENT_URL_BOX.value,
           })
           .then(({ content }) => {
             let doc: RawDocumentRequest = {
-              url: el.value,
+              url: CURRENT_URL_BOX.value,
               content,
               doc_type: RawDocType.Html,
               tags: [["lens", "bookmarks"]],
-              source: RawDocSource.WebExtension
+              source: RawDocSource.WebExtension,
             };
 
-            client.add_raw_document(doc);
+            return SPYGLASS_CLIENT.add_raw_document(doc);
           });
       }
     }
@@ -50,7 +58,7 @@ function handle_onclick() {
     /**
      * Handle button clicks
      */
-    let btn_id = (<HTMLButtonElement>e.target)?.id;
+    let btn_id = (e.target as HTMLButtonElement)?.id;
     if (btn_id === "cancel") {
       window.close();
     } else if (btn_id === "add") {
@@ -59,7 +67,7 @@ function handle_onclick() {
         .then(add_tab)
         .catch(reportError);
     } else if (btn_id === "resync_bookmarks") {
-      browser.runtime.sendMessage({ "command": Commands.ResyncBookmarks });
+      browser.runtime.sendMessage({ command: Commands.ResyncBookmarks });
     }
   });
 }
@@ -81,5 +89,46 @@ function handle_error(error: Error) {
  */
 browser.tabs
   .executeScript({ file: "../scripts/contentscript.js" })
-  .then(handle_onclick)
+  .then(handle_on_popup)
   .catch(handle_error);
+
+// Handle the different content tabs
+function reset_tabs() {
+  for (const div of document.querySelectorAll(".content")) {
+    let el = div as HTMLElement;
+    el.classList.add("hidden");
+  }
+
+  for (const div of document.querySelectorAll(".nav")) {
+    let el = div as HTMLElement;
+    el.classList.replace("border-cyan-500", "border-neutral-900");
+    el.classList.replace("text-white", "text-neutral-400");
+  }
+}
+
+function switch_to_tab(tab: HTMLElement, content: Element) {
+  tab.classList.replace("border-neutral-900", "border-cyan-500");
+  tab.classList.replace("text-neutral-400", "text-white");
+  content.classList.remove("hidden");
+}
+
+function handle_tab_change(e: MouseEvent) {
+  if (e.target) {
+    let tab = (e.target as HTMLElement).getAttribute("data-tab");
+    if (tab) {
+      // hide previous tab
+      reset_tabs();
+      // switch to new tab
+      switch_to_tab(
+        e.target as HTMLElement,
+        document.getElementById(tab) as HTMLElement
+      );
+    }
+  }
+}
+
+for (const id of ["add", "bookmarks", "history"]) {
+  document
+    .getElementById(`tab_${id}`)
+    ?.addEventListener("click", handle_tab_change);
+}

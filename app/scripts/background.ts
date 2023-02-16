@@ -1,59 +1,66 @@
-import browser from "webextension-polyfill";
+import browser, { browserAction } from "webextension-polyfill";
 import { Commands } from "lib/cmd";
+import { SpyglassRpcClient } from "lib/rpc";
+import {
+  sync_bookmarks,
+  handle_delete_bookmark,
+  handle_new_bookmark,
+} from "lib/sync/bookmarks";
 
-const BOOKMARKS_SYNC_TIME = "BOOKMARKS_SYNC_TIME";
+const SPYGLASS_CLIENT = new SpyglassRpcClient();
 
 console.log("background script loaded");
 
-function walk_tree(
-  item: browser.Bookmarks.BookmarkTreeNode,
-  last_sync_date: Date
+function check_and_set_indexed_badge(url: string): Promise<void> {
+  return SPYGLASS_CLIENT.is_document_indexed(url).then((is_indexed) => {
+    if (is_indexed) {
+      browserAction.setBadgeText({ text: "✓" });
+      browserAction.setBadgeTextColor({ color: "white" });
+      browserAction.setBadgeBackgroundColor({ color: "rgb(21 128 61)" });
+    } else {
+      browserAction.setBadgeText({ text: null });
+      browserAction.setBadgeBackgroundColor({ color: null });
+    }
+  });
+}
+
+async function handle_tab_updated(
+  activeInfo: browser.Tabs.OnActivatedActiveInfoType
 ) {
-  if (item.url && item.type == "bookmark" && item.url.startsWith("http")) {
-    if (item.dateAdded) {
-      let date_added = new Date(item.dateAdded);
-      if (date_added > last_sync_date) {
-        console.log(`url: ${item.url}, added: ${date_added}`);
+  let tab = await browser.tabs.get(activeInfo.tabId);
+  if (tab.url && (tab.url == "about:newtab" || tab.url == "about:blank")) {
+    function handle_tab_url(
+      _: number,
+      changeInfo: browser.Tabs.OnUpdatedChangeInfoType,
+      newTab: browser.Tabs.Tab
+    ) {
+      if (changeInfo.url && newTab.url) {
+        check_and_set_indexed_badge(newTab.url).then(() =>
+          browser.tabs.onUpdated.removeListener(handle_tab_url)
+        );
       }
     }
+
+    browser.tabs.onUpdated.addListener(handle_tab_url, {
+      tabId: tab.id,
+      properties: ["url"],
+    });
+  } else if (tab.url) {
+    check_and_set_indexed_badge(tab.url);
   }
-
-  if (item.children) {
-    for (const child of item.children) {
-      walk_tree(child, last_sync_date);
-    }
-  }
-}
-
-/// Sync new bookmarks w/ Spyglass
-async function sync_bookmarks(bmarks: browser.Bookmarks.BookmarkTreeNode[]) {
-  let record: Record<string, Date> = await browser.storage.local.get(
-    BOOKMARKS_SYNC_TIME
-  );
-  let last_synced = record[BOOKMARKS_SYNC_TIME] || new Date(0);
-  let now = new Date();
-  console.info(`bookmarks last synced: ${last_synced}`);
-
-  walk_tree(bmarks[0], last_synced);
-  await browser.storage.local.set({ BOOKMARKS_SYNC_TIME: now });
-}
-
-async function handle_new_bookmark(_: string, bookmark: browser.Bookmarks.BookmarkTreeNode) {
-  console.log(`new bookmark: ${bookmark.url}`);
-}
-
-async function handle_delete_bookmark(_: string, removeInfo: browser.Bookmarks.OnRemovedRemoveInfoType) {
-  console.log(`deleted bookmark: ${removeInfo.node.url}`);
 }
 
 function handle_error(error: Error) {
   console.error(error);
 }
 
+browserAction.setBadgeText({ text: "" });
+browserAction.setBadgeBackgroundColor({ color: null });
 browser.runtime.onMessage.addListener((message) => {
   if (message.command === Commands.ResyncBookmarks) {
     // Reset last sync time
-    return browser.storage.local.set({ BOOKMARKS_SYNC_TIME: new Date(0) })
+    return browser.storage.local
+      .set({ BOOKMARKS_SYNC_TIME: new Date(0) })
       .then(() => browser.bookmarks.getTree())
       .then(sync_bookmarks, handle_error);
   }
@@ -66,3 +73,6 @@ browser.bookmarks.getTree().then(sync_bookmarks, handle_error);
 browser.bookmarks.onCreated.addListener(handle_new_bookmark);
 browser.bookmarks.onRemoved.addListener(handle_delete_bookmark);
 // Walk through history & sync w/ Spyglass
+
+// Listen for when the active tab changes
+browser.tabs.onActivated.addListener(handle_tab_updated);

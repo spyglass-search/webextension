@@ -9,21 +9,27 @@ type ClientBrowserCallServerFunctionCallback = (
 
 type RpcError = JSONRPCErrorLike | null | undefined;
 
+interface RpcResponse {
+  id: string;
+  jsonrpc: string;
+  result: object | string | boolean | null;
+}
+
 export enum RawDocType {
   Html = "Html",
-  Url = "Url"
+  Url = "Url",
 }
 
 export enum RawDocSource {
   Cli = "Cli",
-  WebExtension = "WebExtension"
+  WebExtension = "WebExtension",
 }
 
 export interface RawDocumentRequest {
   url: string;
   content: string;
   doc_type: RawDocType;
-  source: RawDocSource,
+  source: RawDocSource;
   tags: Array<[string, string]>;
 }
 
@@ -51,18 +57,44 @@ function callServer(
     });
 }
 
+// todo: generate this from spyglass-rpc?
+enum SpyglassApi {
+  AddRawDocument = "spyglass_index.add_raw_document",
+  IsDocumentIndexed = "spyglass_index.is_document_indexed",
+}
+
 export class SpyglassRpcClient {
   client: rpcBrowserClient = new rpcBrowserClient(callServer, {});
 
-  add_raw_document(doc: RawDocumentRequest) {
-    this.client.request(
-      "spyglass_index.add_raw_document",
-      { doc },
-      (err: RpcError, result: JSONRPCResultLike) => {
-        if (err) {
-          throw err;
+  _call(method: string, params: object): Promise<RpcResponse> {
+    return new Promise((resolve, reject) => {
+      this.client.request(
+        method,
+        params,
+        (err: RpcError, response: RpcResponse) => {
+          if (err) {
+            this.handle_error(err);
+            reject(err);
+          } else {
+            resolve(response);
+          }
         }
-      }
-    );
+      );
+    });
+  }
+
+  handle_error(err: RpcError) {
+    if (err) {
+      throw err;
+    }
+  }
+
+  async add_raw_document(doc: RawDocumentRequest): Promise<void> {
+    this._call(SpyglassApi.AddRawDocument, { doc });
+  }
+
+  async is_document_indexed(url: string): Promise<boolean> {
+    let resp = await this._call(SpyglassApi.IsDocumentIndexed, { url });
+    return resp.result as boolean;
   }
 }

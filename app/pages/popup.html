@@ -1,29 +1,124 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-  </head>
-
-  <body class="min-w-[384px] dark:bg-neutral-700 rounded">
-    <div class="p-4">
-      <div class="dark:text-white">
-        <div class="flex flex-col gap-4">
-          <div class="text-xl font-bold">Add URL to Spyglass</div>
-          <input class="w-full rounded p-2 text-white dark:bg-neutral-500" type="text" id="current_url" placeholder="Tab URL" disabled="disabled" value="https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Firefox_differentiators" />
-          <div class="text-xs text-neutral-400">
-            Use the
-            <span class="rounded bg-cyan-500 p-1 font-mono text-white">/bookmarks</span>
-            lens to filter URLs from this extension.
-          </div>
+    <head>
+        <meta charset="utf-8" />
+    </head>
+    <body class="min-w-[440px] dark:bg-stone-800 rounded text-white">
+        <div class="px-4 pt-4 bg-neutral-900">
+            <ul class="flex flex-row gap-4 text-white text-sm">
+                <li
+                    id="tab_add"
+                    data-tab="content_add"
+                    class="nav cursor-pointer border-b-2 border-cyan-500 px-4 pb-2"
+                >
+                    Add Current Tab
+                </li>
+                <li
+                    id="tab_bookmarks"
+                    data-tab="content_bookmarks"
+                    class="nav cursor-pointer border-b-2 border-neutral-900 px-4 pb-2 text-neutral-400 hover:border-cyan-500 hover:text-white"
+                >
+                    Sync Bookmarks
+                </li>
+                <li
+                    id="tab_history"
+                    data-tab="content_history"
+                    class="nav cursor-pointer border-b-2 border-neutral-900 px-4 pb-2 text-neutral-400 hover:border-cyan-500 hover:text-white"
+                >
+                    Sync History
+                </li>
+            </ul>
         </div>
-        <div class="mt-8 flex flex-row place-content-end gap-4">
-          <button id="add" type="button" class="rounded bg-green-500 py-2 px-4">Add</button>
-          <button id="cancel" type="reset" class="rounded bg-neutral-500 py-2 px-4">Cancel</button>
-          <button id="resync_bookmarks" type="button" class="rounded bg-neutral-500 py-2 px-4">Resync</button>
+        <div class="content p-4 hidden" id="content_add">
+            <div class="dark:text-white">
+                <div class="flex flex-col gap-4">
+                    <input
+                        class="w-full rounded p-2 text-sm text-white dark:bg-neutral-600"
+                        type="text"
+                        id="current_url"
+                        placeholder="Tab URL"
+                        disabled="disabled"
+                        value="http://example.com"
+                    />
+                    <div class="text-xs text-neutral-400">
+                        Use the
+                        <div
+                            class="inline-block rounded bg-cyan-500 py-0.5 px-1 text-white gap-0 mx-1"
+                        >
+                            <svg
+                                class="w-4 h-4 inline"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke-width="2"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.774 4.774zM21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                            </svg>
+                            <span>bookmarks</span>
+                        </div>
+                        lens to filter URLs from this extension.
+                    </div>
+                </div>
+                <div
+                    class="mt-8 flex flex-row place-content-end gap-2 text-base"
+                >
+                    <button
+                        id="add"
+                        type="button"
+                        class="rounded py-1 px-2 bg-green-700 hover:bg-green-900"
+                    >
+                        Add to Spyglass
+                    </button>
+                    <button
+                        id="cancel"
+                        type="reset"
+                        class="rounded py-1 px-2 bg-neutral-500 hover:bg-neutral-600"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-    <script src="../scripts/popup.js"></script>
-  </body>
+        <div class="content p-4" id="content_bookmarks">
+            <div class="flex flex-row items-center mb-4">
+                <div class="text-base">
+                    Last synced:
+                    <span id="last_synced" class="text-cyan-500"
+                        >Feb. 2, 2022</span
+                    >
+                </div>
+                <button
+                    type="button"
+                    id="resync_bookmarks"
+                    class="ml-auto rounded py-1 px-2 bg-neutral-500 hover:bg-neutral-600 text-sm"
+                >
+                    Resync Bookmarks
+                </button>
+            </div>
+            <table class="text-sm bg-neutral-500 w-full rounded">
+                <tr>
+                    <td class="p-2">https://example.com</td>
+                </tr>
+            </table>
+        </div>
+        <div class="content p-4 hidden" id="content_history">
+            <div class="text-sm mb-2">
+                Last synced:
+                <span id="last_synced" class="text-cyan-500">Feb. 2, 2022</span>
+            </div>
+            <button
+                type="button"
+                id="resync_history"
+                class="rounded py-1 px-2 bg-neutral-500 hover:bg-neutral-700 text-sm"
+            >
+                Resync History
+            </button>
+        </div>
+        <script src="../scripts/popup.js"></script>
+    </body>
 </html>
-
