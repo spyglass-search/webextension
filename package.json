@@ -1,23 +1,24 @@
 {
-  "name": "spyglass",
-  "displayName": "Spyglass Search",
-  "description": "Sync bookmarks and add URLs to your personal search engine.",
-  "devDependencies": {
-    "@types/webextension-polyfill": "^0.10.0",
-    "@types/whatwg-fetch": "^0.0.33",
-    "@webextension-toolbox/webextension-toolbox": "^5.2.2",
-    "autoprefixer": "^10.4.13",
-    "css-loader": "^6.7.3",
-    "postcss": "^8.4.21",
-    "postcss-loader": "^7.0.2",
-    "postcss-preset-env": "^8.0.1",
-    "style-loader": "^3.3.1",
-    "tailwindcss": "^3.2.6",
-    "typescript": "^4.9.5"
-  },
-  "dependencies": {
-    "jayson": "^4.0.0",
-    "webextension-polyfill": "^0.10.0",
-    "whatwg-fetch": "^3.6.2"
-  }
+    "name": "spyglass",
+    "displayName": "Spyglass Search",
+    "description": "Sync bookmarks and add URLs to your personal search engine.",
+    "devDependencies": {
+        "@types/webextension-polyfill": "^0.10.0",
+        "@types/whatwg-fetch": "^0.0.33",
+        "@webextension-toolbox/webextension-toolbox": "^5.2.2",
+        "autoprefixer": "^10.4.13",
+        "css-loader": "^6.7.3",
+        "postcss": "^8.4.21",
+        "postcss-loader": "^7.0.2",
+        "postcss-preset-env": "^8.0.1",
+        "prettier": "2.8.4",
+        "style-loader": "^3.3.1",
+        "tailwindcss": "^3.2.6",
+        "typescript": "^4.9.5"
+    },
+    "dependencies": {
+        "jayson": "^4.0.0",
+        "webextension-polyfill": "^0.10.0",
+        "whatwg-fetch": "^3.6.2"
+    }
 }

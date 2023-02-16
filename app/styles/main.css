@@ -4,10 +4,10 @@
 
 html,
 body {
-  min-width: 256px;
-  width: 256px;
+    min-width: 256px;
+    width: 256px;
 }
 
 .hidden {
-  display: none;
+    display: none;
 }
