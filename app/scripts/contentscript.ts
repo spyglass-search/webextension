@@ -7,7 +7,8 @@ declare global {
   }
 }
 
-function handle_add_uri() {
+// Grabs the content of page for indexing
+function handle_get_tab_content() {
   let content = document.documentElement.innerHTML;
   return Promise.resolve({ content });
 }
@@ -22,15 +23,15 @@ function handle_add_uri() {
     return;
   }
 
-  console.log("contentscript loaded!");
+  console.debug("contentscript loaded!");
   window.hasRun = true;
 
   /**
    * Listen for messages from the background script.
    */
   browser.runtime.onMessage.addListener((message) => {
-    if (message.command === Commands.AddDoc) {
-      return handle_add_uri();
+    if (message.command === Commands.GetTabContent) {
+      return handle_get_tab_content();
     }
 
     return true;

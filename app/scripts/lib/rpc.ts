@@ -60,6 +60,7 @@ function callServer(
 // todo: generate this from spyglass-rpc?
 enum SpyglassApi {
   AddRawDocument = "spyglass_index.add_raw_document",
+  DeleteDocumentByUrl = "spyglass_index.delete_document_by_url",
   IsDocumentIndexed = "spyglass_index.is_document_indexed",
 }
 
@@ -67,6 +68,7 @@ export class SpyglassRpcClient {
   client: rpcBrowserClient = new rpcBrowserClient(callServer, {});
 
   _call(method: string, params: object): Promise<RpcResponse> {
+    console.debug(method, params);
     return new Promise((resolve, reject) => {
       this.client.request(
         method,
@@ -91,6 +93,10 @@ export class SpyglassRpcClient {
 
   async add_raw_document(doc: RawDocumentRequest): Promise<void> {
     this._call(SpyglassApi.AddRawDocument, { doc });
+  }
+
+  async delete_document(url: string): Promise<void> {
+    this._call(SpyglassApi.DeleteDocumentByUrl, { url });
   }
 
   async is_document_indexed(url: string): Promise<boolean> {

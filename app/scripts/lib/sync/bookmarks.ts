@@ -1,6 +1,6 @@
 import browser from "webextension-polyfill";
 
-const BOOKMARKS_SYNC_TIME = "BOOKMARKS_SYNC_TIME";
+export const BOOKMARKS_SYNC_TIME = "BOOKMARKS_SYNC_TIME";
 
 function walk_tree(
   item: browser.Bookmarks.BookmarkTreeNode,
