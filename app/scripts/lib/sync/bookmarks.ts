@@ -1,6 +1,5 @@
 import browser from "webextension-polyfill";
-
-export const BOOKMARKS_SYNC_TIME = "BOOKMARKS_SYNC_TIME";
+import { StoreKeys, getStore, setStore } from "storage";
 
 function walk_tree(
   item: browser.Bookmarks.BookmarkTreeNode,
@@ -26,15 +25,12 @@ function walk_tree(
 export async function sync_bookmarks(
   bmarks: browser.Bookmarks.BookmarkTreeNode[]
 ) {
-  let record: Record<string, Date> = await browser.storage.local.get(
-    BOOKMARKS_SYNC_TIME
-  );
-  let last_synced = record[BOOKMARKS_SYNC_TIME] || new Date(0);
+  let last_synced = await getStore<Date>(StoreKeys.BookmarksSyncTime) || new Date(0);
   let now = new Date();
   console.info(`bookmarks last synced: ${last_synced}`);
 
   walk_tree(bmarks[0], last_synced);
-  await browser.storage.local.set({ BOOKMARKS_SYNC_TIME: now });
+  await setStore<Date>(StoreKeys.BookmarksSyncTime, now);
 }
 
 export async function handle_new_bookmark(
