@@ -1,4 +1,4 @@
-import browser, { Storage } from "webextension-polyfill";
+import browser, { browserAction, Storage } from "webextension-polyfill";
 import { Commands } from "lib/cmd";
 import { SpyglassRpcClient, RawDocType, RawDocSource } from "lib/rpc";
 import {
@@ -6,7 +6,6 @@ import {
   handle_delete_bookmark,
   handle_new_bookmark,
 } from "lib/sync/bookmarks";
-import { sync_history } from "lib/sync/history";
 import { mark_indexed, mark_unindexed } from "lib/utils";
 import { getOrSetStore, StoreKeys } from "storage";
 import { handle_error } from "error";
@@ -16,6 +15,7 @@ interface ExtMessage {
   command: string;
   url?: string;
   content?: string;
+  err?: Error;
 }
 
 function check_and_set_indexed_badge(url: string): Promise<void> {
