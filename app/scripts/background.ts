@@ -24,6 +24,20 @@ function check_and_set_indexed_badge(url: string): Promise<void> {
   });
 }
 
+async function handle_tab_url_update(
+  _: number,
+  changeInfo: browser.Tabs.OnUpdatedChangeInfoType,
+  tab: browser.Tabs.Tab
+) {
+  if (!tab.active) {
+    return;
+  }
+
+  if (changeInfo.url && tab.url) {
+    return check_and_set_indexed_badge(tab.url);
+  }
+}
+
 async function handle_tab_updated(
   activeInfo: browser.Tabs.OnActivatedActiveInfoType
 ) {
@@ -115,6 +129,7 @@ function setup_bookmark_syncer() {
 browser.runtime.onMessage.addListener(handle_message);
 // Listen for when the active tab changes
 browser.tabs.onActivated.addListener(handle_tab_updated);
+browser.tabs.onUpdated.addListener(handle_tab_url_update, { properties: ["url"] });
 
 getOrSetStore<boolean>(StoreKeys.BookmarksSyncIsEnabled, true).then(
   (is_enabled) => {
