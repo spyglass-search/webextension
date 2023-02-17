@@ -90,10 +90,7 @@ function handle_message(message: ExtMessage) {
       url: message.url,
       content: message.content,
       doc_type: RawDocType.Html,
-      tags: [
-        ["lens", "bookmarks"],
-        ["type", "bookmarks"],
-      ],
+      tags: [["lens", "bookmarks"]],
       source: RawDocSource.WebExtension,
     }).then(() => mark_indexed());
   }
@@ -129,7 +126,9 @@ function setup_bookmark_syncer() {
 browser.runtime.onMessage.addListener(handle_message);
 // Listen for when the active tab changes
 browser.tabs.onActivated.addListener(handle_tab_updated);
-browser.tabs.onUpdated.addListener(handle_tab_url_update, { properties: ["url"] });
+browser.tabs.onUpdated.addListener(handle_tab_url_update, {
+  properties: ["url"],
+});
 
 getOrSetStore<boolean>(StoreKeys.BookmarksSyncIsEnabled, true).then(
   (is_enabled) => {
