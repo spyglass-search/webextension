@@ -1,4 +1,4 @@
-import browser, { browserAction } from "webextension-polyfill";
+import browser, { Storage } from "webextension-polyfill";
 import { Commands } from "lib/cmd";
 import { SpyglassRpcClient, RawDocType, RawDocSource } from "lib/rpc";
 import {
@@ -75,18 +75,39 @@ function handle_message(message: ExtMessage) {
       url: message.url,
       content: message.content,
       doc_type: RawDocType.Html,
-      tags: [["lens", "bookmarks"]],
+      tags: [
+        ["lens", "bookmarks"],
+        ["type", "bookmarks"],
+      ],
       source: RawDocSource.WebExtension,
     }).then(() => mark_indexed());
-  } else if (message.command == Commands.AddUrl && message.url) {
-    return SPYGLASS_CLIENT.add_raw_document({
-      url: message.url,
-      content: null,
-      doc_type: RawDocType.Url,
-      tags: [["lens", "bookmarks"]],
-      source: RawDocSource.WebExtension,
-    });
   }
+}
+
+function handle_storage_changes(
+  changes: Storage.StorageAreaOnChangedChangesType
+) {
+  if (changes[StoreKeys.BookmarksSyncIsEnabled]) {
+    let change = changes[StoreKeys.BookmarksSyncIsEnabled];
+    if (!change.newValue) {
+      browser.alarms.clear("bookmark_sync_alarm");
+      browser.bookmarks.onCreated.removeListener(handle_new_bookmark);
+      browser.bookmarks.onRemoved.removeListener(handle_delete_bookmark);
+    } else {
+      setup_bookmark_syncer();
+    }
+  }
+}
+
+function setup_bookmark_syncer() {
+  browser.alarms.create("bookmark_sync_alarm", {
+    // immediately kicks off a sync on load
+    when: Date.now() + (1000 + 1),
+    // then every hour
+    periodInMinutes: 60 * 1,
+  });
+  browser.bookmarks.onCreated.addListener(handle_new_bookmark);
+  browser.bookmarks.onRemoved.addListener(handle_delete_bookmark);
 }
 
 // Listen to webext messages sent by content scripts/popup
@@ -100,18 +121,12 @@ getOrSetStore<boolean>(StoreKeys.BookmarksSyncIsEnabled, true).then(
       return;
     }
 
-    browser.alarms.create("bookmark_sync_alarm", {
-      // immediately kicks off a sync on load
-      when: Date.now() + (1000 + 1),
-      // then every hour
-      periodInMinutes: 60 * 1,
-    });
-
     // Listen for new/updated/removed bookmarks & sync.
-    browser.bookmarks.onCreated.addListener(handle_new_bookmark);
-    browser.bookmarks.onRemoved.addListener(handle_delete_bookmark);
+    setup_bookmark_syncer();
   }
 );
+
+browser.storage.local.onChanged.addListener(handle_storage_changes);
 
 // Listen to bookmark sync alarms
 browser.alarms.onAlarm.addListener((alarm) => {

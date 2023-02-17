@@ -3,13 +3,12 @@ import { useEffect, useState } from "react";
 import { getStore, StoreKeys } from "storage";
 
 export const SyncHistory = () => {
-  let [last_synced, set_last_synced] =
-    useState<Date | null>(null);
+  let [last_synced, set_last_synced] = useState<Date | null>(null);
   let [num_synced, set_num_synced] = useState<number | null>(null);
 
   useEffect(() => {
-    getStore<Date>(StoreKeys.HistorySyncTime).then(v => set_last_synced(v));
-    getStore<number>(StoreKeys.HistoryNumSynced).then(v => set_num_synced(v));
+    getStore<Date>(StoreKeys.HistorySyncTime).then((v) => set_last_synced(v));
+    getStore<number>(StoreKeys.HistoryNumSynced).then((v) => set_num_synced(v));
   });
 
   return (

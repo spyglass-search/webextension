@@ -6,7 +6,6 @@ import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import browser, { Tabs as BrowserTabs } from "webextension-polyfill";
 
 import { SpyglassRpcClient } from "lib/rpc";
-import { StoreKeys, getStore } from "storage";
 import { handle_error } from "error";
 
 import { AddTab } from "pages/AddTab";
@@ -48,28 +47,20 @@ const App = () => {
       "text-neutral-400": idx != tab_idx,
       // selected tab classes
       "border-cyan-500": idx == tab_idx,
-      "text-white": idx == tab_idx
+      "text-white": idx == tab_idx,
     };
   }
 
   return (
-    <Tabs className="bg-neutral-900" selectedIndex={tab_idx} onSelect={(idx) => set_tab_idx(idx)}>
+    <Tabs
+      className="bg-neutral-900"
+      selectedIndex={tab_idx}
+      onSelect={(idx) => set_tab_idx(idx)}
+    >
       <TabList className="px-4 pt-4 flex flex-row gap-4 text-white text-sm">
-        <Tab
-          className={tabClasses(0)}
-        >
-          Add Current Tab
-        </Tab>
-        <Tab
-          className={tabClasses(1)}
-        >
-          Sync Bookmarks
-        </Tab>
-        <Tab
-          className={tabClasses(2)}
-        >
-          Sync History
-        </Tab>
+        <Tab className={tabClasses(0)}>Add Current Tab</Tab>
+        <Tab className={tabClasses(1)}>Sync Bookmarks</Tab>
+        <Tab className={tabClasses(2)}>Sync History</Tab>
       </TabList>
       <TabPanel className="bg-stone-800">
         <AddTab current_url={current_url} is_indexed={is_indexed} />

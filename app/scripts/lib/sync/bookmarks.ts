@@ -8,7 +8,10 @@ function _add_url(url: string): Promise<void> {
     url,
     content: null,
     doc_type: RawDocType.Url,
-    tags: [["lens", "bookmarks"]],
+    tags: [
+      ["lens", "bookmarks"],
+      ["type", "bookmarks"],
+    ],
     source: RawDocSource.WebExtension,
   });
 }
