@@ -3,5 +3,6 @@ export enum Commands {
   AddUrl = "add_url",
   GetTabContent = "get_tab_content",
   RemoveDoc = "remove_doc",
+  ResyncHistory = "resync_history",
   ResyncBookmarks = "resync_bookmarks",
 }

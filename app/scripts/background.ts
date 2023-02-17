@@ -6,6 +6,7 @@ import {
   handle_delete_bookmark,
   handle_new_bookmark,
 } from "lib/sync/bookmarks";
+import { sync_history } from "lib/sync/history";
 import { mark_indexed, mark_unindexed } from "lib/utils";
 import { getOrSetStore, StoreKeys } from "storage";
 import { handle_error } from "error";
@@ -127,7 +128,6 @@ getOrSetStore<boolean>(StoreKeys.BookmarksSyncIsEnabled, true).then(
 );
 
 browser.storage.local.onChanged.addListener(handle_storage_changes);
-
 // Listen to bookmark sync alarms
 browser.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name == "bookmark_sync_alarm") {
@@ -141,4 +141,5 @@ browser.alarms.onAlarm.addListener((alarm) => {
   }
 });
 
+// setup_history_syncer();
 console.info("background script loaded");

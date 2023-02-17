@@ -60,7 +60,7 @@ const App = () => {
       <TabList className="px-4 pt-4 flex flex-row gap-4 text-white text-sm">
         <Tab className={tabClasses(0)}>Add Current Tab</Tab>
         <Tab className={tabClasses(1)}>Sync Bookmarks</Tab>
-        <Tab className={tabClasses(2)}>Sync History</Tab>
+        {/* <Tab className={tabClasses(2)}>Sync History</Tab> */}
       </TabList>
       <TabPanel className="bg-stone-800">
         <AddTab current_url={current_url} is_indexed={is_indexed} />
@@ -68,9 +68,9 @@ const App = () => {
       <TabPanel className="bg-stone-800">
         <SyncBookmarks />
       </TabPanel>
-      <TabPanel className="bg-stone-800">
+      {/* <TabPanel className="bg-stone-800">
         <SyncHistory />
-      </TabPanel>
+      </TabPanel> */}
     </Tabs>
   );
 };
@@ -89,4 +89,12 @@ browser.tabs
     const root = createRoot(container!);
     root.render(<App />);
   })
-  .catch(handle_error);
+  .catch((err) => {
+    const container = document.getElementById("root");
+    const root = createRoot(container!);
+    root.render(
+      <div className="bg-neutral-900 text-red-700">
+        The extension was unable to index the current tab.
+      </div>
+    );
+  });
