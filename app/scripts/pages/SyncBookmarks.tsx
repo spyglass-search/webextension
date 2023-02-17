@@ -1,10 +1,10 @@
-import browser from 'webextension-polyfill';
+import browser from "webextension-polyfill";
 import * as React from "react";
-import { Commands } from 'lib/cmd';
+import { Commands } from "lib/cmd";
 
 type SyncBookmarksProps = {
-    last_synced: Date | null
-}
+  last_synced: Date | null;
+};
 
 export const SyncBookmarks = ({ last_synced }: SyncBookmarksProps) => {
   function handle_resync_bookmarks() {
@@ -19,10 +19,7 @@ export const SyncBookmarks = ({ last_synced }: SyncBookmarksProps) => {
         <div className="text-sm">
           Last synced:
           <span className="text-cyan-500 ml-1">
-            { last_synced
-              ? last_synced.toLocaleString()
-              : "Not synced yet"
-            }
+            {last_synced ? last_synced.toLocaleString() : "Not synced yet"}
           </span>
         </div>
         <button

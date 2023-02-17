@@ -1,8 +1,8 @@
 import * as React from "react";
 
 type SyncHistoryProps = {
-    last_synced: Date | null
-}
+  last_synced: Date | null;
+};
 
 export const SyncHistory = ({ last_synced }: SyncHistoryProps) => {
   return (
@@ -11,10 +11,7 @@ export const SyncHistory = ({ last_synced }: SyncHistoryProps) => {
         <div className="text-sm">
           Last synced:
           <span className="text-cyan-500 ml-1">
-          { last_synced
-              ? last_synced.toLocaleString()
-              : "Not synced yet"
-            }
+            {last_synced ? last_synced.toLocaleString() : "Not synced yet"}
           </span>
         </div>
         <button

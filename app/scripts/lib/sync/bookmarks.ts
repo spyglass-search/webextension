@@ -25,7 +25,8 @@ function walk_tree(
 export async function sync_bookmarks(
   bmarks: browser.Bookmarks.BookmarkTreeNode[]
 ) {
-  let last_synced = await getStore<Date>(StoreKeys.BookmarksSyncTime) || new Date(0);
+  let last_synced =
+    (await getStore<Date>(StoreKeys.BookmarksSyncTime)) || new Date(0);
   let now = new Date();
   console.info(`bookmarks last synced: ${last_synced}`);
 
