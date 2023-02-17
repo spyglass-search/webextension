@@ -27,7 +27,7 @@ export enum RawDocSource {
 
 export interface RawDocumentRequest {
   url: string;
-  content: string;
+  content: string | null;
   doc_type: RawDocType;
   source: RawDocSource;
   tags: Array<[string, string]>;
