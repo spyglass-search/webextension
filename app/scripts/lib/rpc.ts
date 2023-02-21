@@ -1,5 +1,4 @@
 import "whatwg-fetch";
-import { browserAction } from "webextension-polyfill";
 import rpcBrowserClient from "jayson/lib/client/browser";
 import { JSONRPCErrorLike } from "jayson";
 import { mark_error } from "./utils";
