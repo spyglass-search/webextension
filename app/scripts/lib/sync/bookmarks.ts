@@ -1,5 +1,5 @@
 import browser from "webextension-polyfill";
-import { StoreKeys, getStore, setStores, getOrSetStore } from "storage";
+import { StoreKeys, setStores, getOrSetStore, getStore } from "storage";
 import { SpyglassRpcClient, RawDocType, RawDocSource } from "lib/rpc";
 
 const SPYGLASS_CLIENT = new SpyglassRpcClient();
@@ -18,7 +18,7 @@ function walk_tree(
   last_sync_date: Date
 ): number {
   let count = 0;
-  if (item.url && item.type == "bookmark" && item.url.startsWith("http")) {
+  if (item.url && item.url.startsWith("http")) {
     if (item.dateAdded) {
       let date_added = new Date(item.dateAdded);
       if (date_added > last_sync_date && item.url) {
@@ -43,9 +43,10 @@ export async function sync_bookmarks(
   force_sync: boolean
 ) {
   let now = new Date();
-  let last_synced =
-    (await getStore<Date>(StoreKeys.BookmarksSyncTime)) || new Date(0);
-  console.info(`bookmarks last synced: ${last_synced}`);
+  let result = (await getStore<number>(StoreKeys.BookmarksSyncTime)) || 0;
+  let last_synced = new Date(result);
+
+  console.info(`bookmarks last synced: ${last_synced.toISOString()}`);
 
   // Set date to epoch if we're forcing a sync.
   last_synced = force_sync ? new Date(0) : last_synced;
@@ -57,7 +58,7 @@ export async function sync_bookmarks(
     ? 0
     : await getOrSetStore<number>(StoreKeys.BookmarksNumSynced, 0);
   return setStores({
-    [StoreKeys.BookmarksSyncTime]: now,
+    [StoreKeys.BookmarksSyncTime]: now.getTime(),
     [StoreKeys.BookmarksNumSynced]: num_synced + total_synced,
   });
 }

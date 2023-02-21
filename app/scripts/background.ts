@@ -1,4 +1,4 @@
-import browser, { browserAction, Storage } from "webextension-polyfill";
+import browser, { Storage } from "webextension-polyfill";
 import { Commands } from "lib/cmd";
 import { SpyglassRpcClient, RawDocType, RawDocSource } from "lib/rpc";
 import {
@@ -73,7 +73,7 @@ function handle_message(message: ExtMessage) {
   if (message.command == Commands.ResyncBookmarks) {
     // Reset last sync time
     return browser.storage.local
-      .set({ BOOKMARKS_SYNC_TIME: new Date(0) })
+      .set({ [StoreKeys.BookmarksSyncTime]: 0 })
       .then(() => browser.bookmarks.getTree())
       .then((bmarks) => sync_bookmarks(bmarks, true))
       .catch(handle_error);
@@ -128,7 +128,9 @@ browser.runtime.onMessage.addListener(handle_message);
 browser.tabs.onActivated.addListener(handle_tab_updated);
 
 if (process.env.VENDOR == "firefox") {
-  browser.tabs.onUpdated.addListener(handle_tab_url_update, { properties: ["url"] });
+  browser.tabs.onUpdated.addListener(handle_tab_url_update, {
+    properties: ["url"],
+  });
 } else {
   browser.tabs.onUpdated.addListener(handle_tab_url_update);
 }

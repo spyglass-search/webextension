@@ -15,7 +15,9 @@ export const SyncBookmarks = () => {
     getOrSetStore<boolean>(StoreKeys.BookmarksSyncIsEnabled, true).then((v) =>
       set_is_enabled(v)
     );
-    getStore<Date>(StoreKeys.BookmarksSyncTime).then((v) => set_last_synced(v));
+    getStore<number>(StoreKeys.BookmarksSyncTime).then((v) =>
+      set_last_synced(new Date(v || 0))
+    );
     getStore<number>(StoreKeys.BookmarksNumSynced).then((v) =>
       set_num_synced(v)
     );

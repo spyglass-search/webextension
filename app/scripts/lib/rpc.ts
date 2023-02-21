@@ -1,7 +1,8 @@
 import "whatwg-fetch";
-import browser, { browserAction } from "webextension-polyfill";
+import { browserAction } from "webextension-polyfill";
 import rpcBrowserClient from "jayson/lib/client/browser";
 import { JSONRPCErrorLike } from "jayson";
+import { mark_error } from "./utils";
 
 type ClientBrowserCallServerFunctionCallback = (
   err?: Error | null,
@@ -88,17 +89,13 @@ export class SpyglassRpcClient {
 
   handle_error(err: RpcError) {
     if (err) {
-      browserAction.setBadgeText({ text: "⚠" });
-      browserAction.setBadgeTextColor({ color: "white" });
-      browserAction.setBadgeBackgroundColor({ color: "red" });
-      browserAction.setTitle({ title: "Unable to connect to Spyglass" });
+      mark_error("Unable to connect to Spyglass");
       console.error(err);
     }
   }
 
   async add_raw_document(doc: RawDocumentRequest): Promise<void> {
-    let binfo = await browser.runtime.getBrowserInfo();
-    doc.tags.push(["source", binfo.name]);
+    doc.tags.push(["source", process.env.VENDOR || "browser"]);
     doc.tags.push(["source", "webextension"]);
     this._call(SpyglassApi.AddRawDocument, { doc });
   }
