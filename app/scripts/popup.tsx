@@ -80,7 +80,7 @@ const App = () => {
  * If we couldn't inject the script, handle the error.
  */
 browser.tabs
-  .executeScript({ file: "../scripts/contentscript.js" })
+  .executeScript({ file: "scripts/contentscript.js" })
   .then(() => {
     //
     // todo: run a quick check to see if spyglass is running before rendering anything
@@ -93,8 +93,9 @@ browser.tabs
     const container = document.getElementById("root");
     const root = createRoot(container!);
     root.render(
-      <div className="bg-neutral-900 text-red-700">
-        The extension was unable to index the current tab.
+      <div className="bg-neutral-900 text-red-700 p-4 font-bold">
+        <div>The extension was unable index the current tab.</div>
+        <div>{`${err}`}</div>
       </div>
     );
   });
