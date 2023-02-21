@@ -79,8 +79,13 @@ const App = () => {
  * When the popup loads, inject a content script into the active tab,
  * If we couldn't inject the script, handle the error.
  */
+let script_loc = "scripts/contentscript.js";
+if (process.env.VENDOR == 'firefox') {
+  script_loc = "../scripts/contentscript.js"
+}
+
 browser.tabs
-  .executeScript({ file: "scripts/contentscript.js" })
+  .executeScript({ file: script_loc })
   .then(() => {
     //
     // todo: run a quick check to see if spyglass is running before rendering anything
