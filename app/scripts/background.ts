@@ -126,9 +126,12 @@ function setup_bookmark_syncer() {
 browser.runtime.onMessage.addListener(handle_message);
 // Listen for when the active tab changes
 browser.tabs.onActivated.addListener(handle_tab_updated);
-browser.tabs.onUpdated.addListener(handle_tab_url_update, {
-  properties: ["url"],
-});
+
+if (process.env.VENDOR == "firefox") {
+  browser.tabs.onUpdated.addListener(handle_tab_url_update, { properties: ["url"] });
+} else {
+  browser.tabs.onUpdated.addListener(handle_tab_url_update);
+}
 
 getOrSetStore<boolean>(StoreKeys.BookmarksSyncIsEnabled, true).then(
   (is_enabled) => {
