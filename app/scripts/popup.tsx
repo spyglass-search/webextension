@@ -6,11 +6,10 @@ import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import browser, { Tabs as BrowserTabs } from "webextension-polyfill";
 
 import { SpyglassRpcClient } from "lib/rpc";
-import { handle_error } from "error";
 
 import { AddTab } from "pages/AddTab";
 import { SyncBookmarks } from "pages/SyncBookmarks";
-import { SyncHistory } from "pages/SyncHistory";
+// import { SyncHistory } from "pages/SyncHistory";
 
 const SPYGLASS_CLIENT = new SpyglassRpcClient();
 
@@ -84,8 +83,11 @@ if (process.env.VENDOR == 'firefox') {
   script_loc = "../scripts/contentscript.js"
 }
 
-browser.tabs
-  .executeScript({ file: script_loc })
+browser.tabs.query({ active: true, lastFocusedWindow: true })
+  .then(tabs => browser.scripting.executeScript({
+    target: { tabId: tabs[0].id as number },
+    files: [script_loc],
+  }))
   .then(() => {
     //
     // todo: run a quick check to see if spyglass is running before rendering anything
