@@ -19,6 +19,7 @@ interface ExtMessage {
 }
 
 function check_and_set_indexed_badge(url: string): Promise<void> {
+  mark_unindexed();
   return SPYGLASS_CLIENT.is_document_indexed(url).then((is_indexed) => {
     is_indexed ? mark_indexed() : mark_unindexed();
   });
