@@ -79,15 +79,18 @@ const App = () => {
  * If we couldn't inject the script, handle the error.
  */
 let script_loc = "scripts/contentscript.js";
-if (process.env.VENDOR == 'firefox') {
-  script_loc = "../scripts/contentscript.js"
+if (process.env.VENDOR == "firefox") {
+  script_loc = "../scripts/contentscript.js";
 }
 
-browser.tabs.query({ active: true, lastFocusedWindow: true })
-  .then(tabs => browser.scripting.executeScript({
-    target: { tabId: tabs[0].id as number },
-    files: [script_loc],
-  }))
+browser.tabs
+  .query({ active: true, lastFocusedWindow: true })
+  .then((tabs) =>
+    browser.scripting.executeScript({
+      target: { tabId: tabs[0].id as number },
+      files: [script_loc],
+    })
+  )
   .then(() => {
     //
     // todo: run a quick check to see if spyglass is running before rendering anything
