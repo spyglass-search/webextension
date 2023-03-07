@@ -2,35 +2,56 @@ import browser from "webextension-polyfill";
 import { StoreKeys, setStores, getOrSetStore, getStore } from "storage";
 import { SpyglassRpcClient, RawDocType, RawDocSource } from "lib/rpc";
 
+const BUFFER_COUNT = 50;
 const SPYGLASS_CLIENT = new SpyglassRpcClient();
+const BOOKMARK_LENS: Array<[string, string]> = new Array(["lens", "bookmarks"]);
+
+let BUFFER: Array<string> = [];
+
 function _add_url(url: string): Promise<void> {
   return SPYGLASS_CLIENT.add_raw_document({
     url,
     content: null,
     doc_type: RawDocType.Url,
-    tags: [["lens", "bookmarks"]],
+    tags: BOOKMARK_LENS,
     source: RawDocSource.WebExtension,
   });
 }
 
-function walk_tree(
+function _check_buffer(flush: boolean): Promise<void> {
+  if (BUFFER.length > BUFFER_COUNT || flush) {
+    let urls: Array<string> = new Array(...BUFFER);
+    BUFFER = [];
+    return SPYGLASS_CLIENT.batch_add_document({
+      urls,
+      tags: BOOKMARK_LENS,
+      source: RawDocSource.WebExtension,
+    });
+  }
+
+  return Promise.resolve();
+}
+
+async function walk_tree(
   item: browser.Bookmarks.BookmarkTreeNode,
-  last_sync_date: Date
-): number {
+  last_sync_date: Date,
+  acc: Array<string>
+): Promise<number> {
   let count = 0;
   if (item.url && item.url.startsWith("http")) {
     if (item.dateAdded) {
       let date_added = new Date(item.dateAdded);
       if (date_added > last_sync_date && item.url) {
         count += 1;
-        _add_url(item.url);
+        BUFFER.push(item.url);
+        await _check_buffer(false);
       }
     }
   }
 
   if (item.children) {
     for (const child of item.children) {
-      count += walk_tree(child, last_sync_date);
+      count += await walk_tree(child, last_sync_date, acc);
     }
   }
 
@@ -52,7 +73,10 @@ export async function sync_bookmarks(
   last_synced = force_sync ? new Date(0) : last_synced;
   // Walk boomark hierarchy and add bookmarks that have been added after
   // <lastSync>
-  let num_synced = walk_tree(bmarks[0], last_synced);
+  let acc: Array<string> = [];
+  let num_synced = await walk_tree(bmarks[0], last_synced, acc);
+  await _check_buffer(true);
+
   // If we're not forcing a new sync, get the total number of bookmarks synced so far.
   let total_synced = force_sync
     ? 0

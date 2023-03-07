@@ -40,9 +40,7 @@
       "all_frames": false
     }
   ],
-  "__chrome__host_permissions": [
-    "http://localhost/*"
-  ],
+  "__chrome__host_permissions": ["http://localhost/*"],
   "__chrome__permissions": [
     "activeTab",
     "alarms",

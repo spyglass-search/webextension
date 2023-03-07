@@ -26,6 +26,12 @@ export enum RawDocSource {
   WebExtension = "WebExtension",
 }
 
+export interface BatchDocumentRequqest {
+  urls: Array<string>;
+  source: RawDocSource;
+  tags: Array<[string, string]>;
+}
+
 export interface RawDocumentRequest {
   url: string;
   content: string | null;
@@ -61,6 +67,7 @@ function callServer(
 // todo: generate this from spyglass-rpc?
 enum SpyglassApi {
   AddRawDocument = "spyglass_index.add_raw_document",
+  BatchAddDocument = "spyglass_index.add_document_batch",
   DeleteDocumentByUrl = "spyglass_index.delete_document_by_url",
   IsDocumentIndexed = "spyglass_index.is_document_indexed",
 }
@@ -86,6 +93,13 @@ export class SpyglassRpcClient {
     });
   }
 
+  _default_tags(): Array<[string, string]> {
+    return [
+      ["source", process.env.VENDOR || "browser"],
+      ["source", "webextension"],
+    ];
+  }
+
   handle_error(err: RpcError) {
     if (err) {
       mark_error("Unable to connect to Spyglass");
@@ -94,9 +108,13 @@ export class SpyglassRpcClient {
   }
 
   async add_raw_document(doc: RawDocumentRequest): Promise<void> {
-    doc.tags.push(["source", process.env.VENDOR || "browser"]);
-    doc.tags.push(["source", "webextension"]);
+    doc.tags.concat(this._default_tags());
     this._call(SpyglassApi.AddRawDocument, { doc });
+  }
+
+  async batch_add_document(req: BatchDocumentRequqest): Promise<void> {
+    req.tags.concat(this._default_tags());
+    this._call(SpyglassApi.BatchAddDocument, { req });
   }
 
   async delete_document(url: string): Promise<void> {
